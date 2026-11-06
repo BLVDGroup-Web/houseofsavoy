@@ -26,8 +26,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .mono{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 
 /* top bar */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:14px var(--gutter-r) 14px var(--gutter-l);background:linear-gradient(var(--ground) 70%,transparent)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;height:47px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px var(--gutter-r) 14px var(--gutter-l);background:var(--ground)}
 .bar img{height:18px;width:auto}
 .bar .right{display:flex;align-items:center;gap:10px;min-width:0}
 .bar .now{color:var(--cream-70);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -50,13 +50,16 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .ig:hover,.ig:focus-visible{border-color:var(--cream);outline:none}
 .statement .cta{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--cream);padding:12px 22px;transition:background .2s,color .2s}
 .statement .cta:hover,.statement .cta:focus-visible{background:var(--cream);color:var(--ground);outline:none}
-.index{display:flex;flex-wrap:wrap;gap:6px 22px;justify-content:center;padding:0 var(--gutter-r) 48px var(--gutter-l);border-bottom:1px solid var(--line)}
-.index a{text-decoration:none;color:var(--cream-70)}
+.index{position:sticky;top:calc(env(safe-area-inset-top,0px) + 47px);z-index:8;display:flex;gap:26px;overflow-x:auto;scrollbar-width:none;white-space:nowrap;padding:13px var(--gutter-r) 13px var(--gutter-l);background:var(--ground);border-bottom:1px solid var(--line)}
+.index::-webkit-scrollbar{display:none}
+@media (min-width:1200px){.index{justify-content:center}}
+.index a{text-decoration:none;color:var(--cream-70);flex:none;padding-bottom:3px;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+.index a[aria-current]{color:var(--cream);border-color:var(--cream)}
 .index a:hover,.index a:focus-visible{color:var(--cream)}
 .index a b{font-weight:400;color:var(--cream-40);margin-right:6px}
 
 /* sections (Baccarat v2 running order) */
-.sec{padding:clamp(40px,6vw,80px) var(--gutter-r) clamp(48px,7vw,96px) var(--gutter-l);border-bottom:1px solid var(--line)}
+.sec{scroll-margin-top:100px;padding:clamp(40px,6vw,80px) var(--gutter-r) clamp(48px,7vw,96px) var(--gutter-l);border-bottom:1px solid var(--line)}
 .sec .head{display:grid;gap:10px;margin-bottom:clamp(28px,4vw,48px)}
 .sec h2{margin:0;font-family:var(--display);font-weight:500;font-size:clamp(40px,6vw,76px);line-height:.95;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 .sec h2 span{display:block;font-weight:400;color:var(--cream-70)}
@@ -189,8 +192,8 @@ footer .mono{color:var(--cream-70)}
       <h1>Forgive me father, it happened again. We let the music play, let them dance, let them sin.</h1>
       <button class="cta" type="button" id="go">View the menu</button>
     </div>
-    <nav class="index mono" id="index" aria-label="Menu sections"></nav>
   </section>
+  <nav class="index mono" id="index" aria-label="Menu sections"></nav>
   <!-- sections render here -->
   <footer id="end">
     <h2>See you <span>tonight.</span></h2>
@@ -278,9 +281,9 @@ if (window.Lenis && !reduce && !matchMedia("print").matches) {
   const raf = t => { lenis.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf);
   lenis.on("scroll", update);
 } else addEventListener("scroll", update, { passive: true });
-const go = el => lenis ? lenis.scrollTo(el, { offset: -56, duration: 1.4 }) : el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+const go = el => lenis ? lenis.scrollTo(el, { offset: -100, duration: 1.4 }) : el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
 document.getElementById("go").addEventListener("click", () => go(sections[0]));
-document.getElementById("index").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); go(document.querySelector(a.getAttribute("hash"))); });
+document.getElementById("index").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); go(document.querySelector(a.hash)); });
 
 // ---- reveal, bar label, progress, bottle drift
 document.documentElement.classList.add("js");
@@ -289,10 +292,19 @@ const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting
 blocks.forEach(s => io.observe(s));
 const prog = document.getElementById("prog"), cheetah = document.getElementById("cheetah");
 const figs = [...document.querySelectorAll(".shelf figure")];
+const nav = document.getElementById("index"), links = [...nav.querySelectorAll("a")];
+let activeId = null;
 function update(){
   const y = scrollY, h = innerHeight, max = document.documentElement.scrollHeight - h;
   for (const el of blocks) { const r = el.getBoundingClientRect(); if (r.top < h && r.bottom > 0) el.classList.add("in"); }  // belt and braces for deep links
   prog.style.width = (max > 0 ? y / max * 100 : 0) + "%";
+  // highlight the section under the pinned menu; the second Grand Reserve page belongs to link 01
+  const cur = sections.findLast(s => s.getBoundingClientRect().top <= 140);
+  const id = cur ? (cur.id === "grand-reserve-2" ? "grand-reserve" : cur.id) : null;
+  if (id !== activeId) { activeId = id;
+    links.forEach(a => a.getAttribute("href") === "#"+id ? a.setAttribute("aria-current","true") : a.removeAttribute("aria-current"));
+    const a = links.find(a => a.hasAttribute("aria-current"));
+    nav.scrollTo({ left: a ? a.offsetLeft - nav.clientWidth/2 + a.offsetWidth/2 : 0, behavior: reduce ? "auto" : "smooth" }); }
   if (!reduce) {
     cheetah.style.transform = `translateY(${Math.min(y, h) * 0.25}px) scale(1.06)`;
     figs.forEach((f, i) => { const r = f.getBoundingClientRect(); if (r.bottom < 0 || r.top > h) return;
