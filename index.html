@@ -114,7 +114,6 @@ footer h2 span{display:block;font-weight:400;color:var(--cream-70)}
 footer .mono{color:var(--cream-70)}
 
 @media (max-width:640px){
-  .bar .now,.bar .now+i{display:none}
   .heads,.row{grid-template-columns:1fr 50px 60px}
   .shelf{grid-template-columns:repeat(3,1fr)}
   .shelf figure{grid-template-rows:136px auto auto}
@@ -174,7 +173,7 @@ footer .mono{color:var(--cream-70)}
 
 <header class="bar">
   <img src="img/cover-586.png" alt="House of Savoy">
-  <span class="mono right"><span class="now" id="now">House of Savoy Drinks Menu</span><i aria-hidden="true">·</i><a class="ig" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">@houseofsavoybangkok</a><i aria-hidden="true">·</i><a class="ig" href="https://www.24blvd.com" target="_blank" rel="noopener">24blvd.com</a></span>
+  <span class="mono right"><a class="ig" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">@houseofsavoybangkok</a><i aria-hidden="true">·</i><a class="ig" href="https://www.24blvd.com" target="_blank" rel="noopener">24blvd.com</a></span>
   <span class="prog"><i id="prog"></i></span>
 </header>
 
@@ -288,7 +287,7 @@ document.documentElement.classList.add("js");
 const blocks = [...document.querySelectorAll(".grp, .sig, .rules")];
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
 blocks.forEach(s => io.observe(s));
-const now = document.getElementById("now"), prog = document.getElementById("prog"), cheetah = document.getElementById("cheetah");
+const prog = document.getElementById("prog"), cheetah = document.getElementById("cheetah");
 const figs = [...document.querySelectorAll(".shelf figure")];
 function update(){
   const y = scrollY, h = innerHeight, max = document.documentElement.scrollHeight - h;
@@ -300,8 +299,6 @@ function update(){
       const p = (r.top + r.height / 2 - h / 2) / h;  // -0.5..0.5 through the viewport
       f.firstElementChild.style.transform = `translateY(${p * (14 + 10 * (i % 3))}px)`; });
   }
-  const cur = sections.findLast(s => s.getBoundingClientRect().top <= h * 0.4);
-  now.textContent = cur ? cur.dataset.label : "House of Savoy Drinks Menu";
 }
 update();
 </script>
