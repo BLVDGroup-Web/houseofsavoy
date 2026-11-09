@@ -38,7 +38,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* hero */
 .hero{position:relative;padding:0 var(--gutter-r) 0 var(--gutter-l)}
-.hero .art{position:relative;aspect-ratio:1437/1000;max-height:78vh;width:100%;overflow:hidden;background:var(--ground)}
+.hero .art{position:relative;aspect-ratio:320/188;max-height:78vh;width:100%;overflow:hidden;background:var(--ground)}
 .hero .art #cheetah{width:100%;height:100%;object-fit:cover;will-change:transform}
 .hero .art #cheetah{-webkit-mask-image:linear-gradient(to top,rgba(0,0,0,0) 0%,#000 42%);mask-image:linear-gradient(to top,rgba(0,0,0,0) 0%,#000 42%)}
 .hero .mark{position:absolute;left:4%;bottom:6%;width:min(78%,860px);display:flex;align-items:flex-end;gap:1.5%}
@@ -185,7 +185,7 @@ footer .mono{color:var(--cream-70)}
 <main id="main">
   <section class="hero" id="top">
     <div class="art">
-      <img src="img/hero-nun.jpg" alt="" id="cheetah">
+      <video id="cheetah" autoplay muted loop playsinline preload="auto" poster="img/hero-party.jpg" aria-hidden="true"><source src="img/hero-party.webm" type="video/webm"><source src="img/hero-party.mp4" type="video/mp4"></video>
       <span class="mono eyebrow">House of Savoy · Sukhumvit 24 · Bangkok</span>
       <div class="mark">
         <img class="wm" src="img/cover-586.png" alt="House of Savoy">
@@ -240,7 +240,7 @@ document.getElementById("index").innerHTML = SECTIONS.filter(s=>!s.skipIndex).ma
 // ---- smooth scroll (Lenis) with native fallback
 const sections = [...document.querySelectorAll(".sec")];
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-if (reduce) document.querySelectorAll("video.run").forEach(v => { v.removeAttribute("autoplay"); v.pause(); });
+if (reduce) document.querySelectorAll("video").forEach(v => { v.removeAttribute("autoplay"); v.pause(); });
 let lenis = null;
 if (window.Lenis && !reduce && !matchMedia("print").matches) {
   lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1, touchMultiplier: 1.3 });
