@@ -41,7 +41,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero .art{position:relative;aspect-ratio:1437/1000;max-height:78vh;width:100%;overflow:hidden;background:var(--ground)}
 .hero .art #cheetah{width:100%;height:100%;object-fit:cover;will-change:transform}
 .hero .art #cheetah{-webkit-mask-image:linear-gradient(to top,rgba(0,0,0,0) 0%,#000 42%);mask-image:linear-gradient(to top,rgba(0,0,0,0) 0%,#000 42%)}
-.hero .wm{position:absolute;left:4%;bottom:6%;width:min(58%,640px);height:auto;filter:drop-shadow(0 2px 12px rgba(0,0,0,.6))}
+.hero .mark{position:absolute;left:4%;bottom:6%;width:min(78%,860px);display:flex;align-items:flex-end;gap:1.5%}
+.hero .wm{flex:0 0 74%;width:74%;height:auto;filter:drop-shadow(0 2px 12px rgba(0,0,0,.6))}
+/* running leopard clip is shot on black: screen blend drops the black so only the cat shows */
+.hero .run{flex:0 0 22%;width:22%;height:auto;aspect-ratio:320/176;mix-blend-mode:screen;margin-bottom:-1%;pointer-events:none}
 .hero .eyebrow{position:absolute;top:18px;left:18px;color:var(--cream-70)}
 .statement{max-width:960px;margin:0 auto;padding:clamp(40px,8vw,96px) 0 clamp(32px,6vw,64px);text-align:center;display:grid;gap:28px;justify-items:center}
 .statement .mono{color:var(--cream-70)}
@@ -184,7 +187,10 @@ footer .mono{color:var(--cream-70)}
     <div class="art">
       <img src="img/hero-nun.jpg" alt="" id="cheetah">
       <span class="mono eyebrow">House of Savoy · Sukhumvit 24 · Bangkok</span>
-      <img class="wm" src="img/cover-586.png" alt="House of Savoy">
+      <div class="mark">
+        <img class="wm" src="img/cover-586.png" alt="House of Savoy">
+        <video class="run" autoplay muted loop playsinline preload="auto" poster="img/leopard-run.jpg" aria-hidden="true"><source src="img/leopard-run.webm" type="video/webm"><source src="img/leopard-run.mp4" type="video/mp4"></video>
+      </div>
     </div>
     <div class="statement">
       <span class="mono">Drinks menu · <a class="ig" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">@houseofsavoybangkok</a></span>
@@ -234,6 +240,7 @@ document.getElementById("index").innerHTML = SECTIONS.filter(s=>!s.skipIndex).ma
 // ---- smooth scroll (Lenis) with native fallback
 const sections = [...document.querySelectorAll(".sec")];
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (reduce) document.querySelectorAll("video.run").forEach(v => { v.removeAttribute("autoplay"); v.pause(); });
 let lenis = null;
 if (window.Lenis && !reduce && !matchMedia("print").matches) {
   lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1, touchMultiplier: 1.3 });
