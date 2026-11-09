@@ -119,6 +119,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .toggle[aria-expanded="true"] i{transform:rotate(45deg)}
 #house-rules .rules{border-top:0;margin-top:clamp(20px,3vw,32px)}
 #rules-list[hidden]{display:none}
+#house-rules{border-bottom:0}
+.js #rules-list .rule{transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.js #rules-list.in .rule{transition-delay:calc(var(--i,0)*90ms)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px clamp(24px,5vw,80px);border-top:1px solid var(--line);padding-top:32px}
 .rule{display:grid;grid-template-columns:64px 1fr;gap:20px;align-items:center}
 .rule img{width:64px;height:64px;object-fit:contain}
@@ -266,22 +269,29 @@ document.getElementById("index").addEventListener("click", e => { const a = e.ta
 
 // ---- house rules: + opens, × closes
 const tg = document.querySelector("#house-rules .toggle"), rl = document.getElementById("rules-list");
+let rulesTimer;
 tg.addEventListener("click", () => { const open = tg.getAttribute("aria-expanded") !== "true";
   tg.setAttribute("aria-expanded", open); tg.setAttribute("aria-label", open ? "Hide house rules" : "Show house rules");
-  rl.hidden = !open; if (open) { rl.classList.add("in"); lenis?.resize?.(); } });
+  clearTimeout(rulesTimer);
+  if (open) {  // show hidden, let the hidden-state styles apply for a frame, then fade each rule in
+    rl.classList.remove("in"); rl.hidden = false; lenis?.resize?.();
+    requestAnimationFrame(() => requestAnimationFrame(() => rl.classList.add("in")));
+  } else {      // fade out, then collapse
+    rl.classList.remove("in"); rulesTimer = setTimeout(() => { rl.hidden = true; lenis?.resize?.(); }, reduce ? 0 : 450);
+  } });
 
 // ---- reveal, bar label, progress, bottle drift
 document.documentElement.classList.add("js");
 const blocks = [...document.querySelectorAll(".grp, .sig, .rules")];
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
-blocks.forEach(s => io.observe(s));
+blocks.forEach(s => s.id !== "rules-list" && io.observe(s));
 const prog = document.getElementById("prog"), cheetah = document.getElementById("cheetah");
 const figs = [...document.querySelectorAll(".shelf figure")];
 const nav = document.getElementById("index"), links = [...nav.querySelectorAll("a")];
 let activeId = null;
 function update(){
   const y = scrollY, h = innerHeight, max = document.documentElement.scrollHeight - h;
-  for (const el of blocks) { const r = el.getBoundingClientRect(); if (r.top < h && r.bottom > 0) el.classList.add("in"); }  // belt and braces for deep links
+  for (const el of blocks) { if (el === rl) continue; const r = el.getBoundingClientRect(); if (r.top < h && r.bottom > 0) el.classList.add("in"); }  // belt and braces for deep links
   prog.style.width = (max > 0 ? y / max * 100 : 0) + "%";
   // highlight the section under the pinned menu; the second Grand Reserve page belongs to link 01
   const cur = sections.findLast(s => s.getBoundingClientRect().top <= 140);
