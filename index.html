@@ -38,7 +38,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* hero */
 .hero{position:relative;padding:0 var(--gutter-r) 0 var(--gutter-l)}
-.hero .art{position:relative;aspect-ratio:320/188;max-height:78vh;width:100%;overflow:hidden;background:var(--ground)}
+.hero .art{position:relative;aspect-ratio:16/9;max-height:78vh;width:100%;overflow:hidden;background:var(--ground)}
 .hero .art #cheetah{width:100%;height:100%;object-fit:cover;will-change:transform}
 .hero .art #cheetah{-webkit-mask-image:linear-gradient(to top,rgba(0,0,0,0) 0%,#000 42%);mask-image:linear-gradient(to top,rgba(0,0,0,0) 0%,#000 42%)}
 .hero .mark{position:absolute;left:4%;bottom:6%;width:min(78%,860px);display:flex;align-items:flex-end;gap:1.5%}
@@ -108,6 +108,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .sig .price{font-family:var(--mono);font-size:18px}
 
 /* house rules */
+/* house rules start collapsed; the + button opens them */
+#house-rules .head{grid-template-columns:1fr auto;align-items:end;margin-bottom:0;padding-bottom:clamp(20px,3vw,32px);border-bottom:1px solid var(--line)}
+#house-rules .head h2{grid-column:1}
+.toggle{grid-column:2;grid-row:1;align-self:end;width:52px;height:52px;border:1px solid var(--cream-40);border-radius:50%;display:grid;place-items:center;transition:border-color .2s,background .2s}
+.toggle:hover,.toggle:focus-visible{border-color:var(--cream);outline:none;background:rgba(239,227,207,.06)}
+.toggle i{position:relative;width:18px;height:18px;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.toggle i::before,.toggle i::after{content:"";position:absolute;left:0;top:50%;width:100%;height:1.5px;margin-top:-.75px;background:var(--cream)}
+.toggle i::after{transform:rotate(90deg)}
+.toggle[aria-expanded="true"] i{transform:rotate(45deg)}
+#house-rules .rules{border-top:0;margin-top:clamp(20px,3vw,32px)}
+#rules-list[hidden]{display:none}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px clamp(24px,5vw,80px);border-top:1px solid var(--line);padding-top:32px}
 .rule{display:grid;grid-template-columns:64px 1fr;gap:20px;align-items:center}
 .rule img{width:64px;height:64px;object-fit:contain}
@@ -168,6 +179,8 @@ footer .mono{color:var(--cream-70)}
   .sig h4{font-size:11pt;white-space:nowrap}
   .sig .price{font-size:12px}
   .rules{gap:7mm 14mm;padding-top:6mm}
+  .sec #rules-list[hidden]{display:grid!important}
+  .toggle{display:none}
   .rule{grid-template-columns:16mm 1fr;gap:6mm}
   .rule img{width:16mm;height:16mm}
   .rule b{font-size:11px}
@@ -194,7 +207,7 @@ footer .mono{color:var(--cream-70)}
     </div>
     <div class="statement">
       <span class="mono">Drinks menu · <a class="ig" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">@houseofsavoybangkok</a></span>
-      <h1>Forgive me father, it happened again. We let the music play, let them dance, let them sin.</h1>
+      <h1>Forgive me father, it happened again.<br>We let the music play, let them dance, let them sin.</h1>
       <button class="cta" type="button" id="go">View the menu</button>
     </div>
   </section>
@@ -230,10 +243,10 @@ const cocktail = ([n,note,f]) => `<figure style="--i:${ri++}"><img src="${img("c
 document.querySelector("footer").insertAdjacentHTML("beforebegin", SECTIONS.map(s => { ri = 0;
   const body = s.kind==="gallery" ? `<div class="gallery">${s.groups.map(shelf).join("")}</div>`
     : s.kind==="cocktails" ? `<div class="sig">${s.items.map(cocktail).join("")}</div>`
-    : s.kind==="rules" ? `<div class="rules">${s.items.map(rule).join("")}</div>`
+    : s.kind==="rules" ? `<div class="rules" id="rules-list" hidden>${s.items.map(rule).join("")}</div>`
     : `<div class="cols">${s.groups.map(listGroup(s.one)).join("")}</div>`;
   return `<section class="sec" id="${s.id}" data-label="${esc(s.a+" "+s.b)}">
-  <div class="head"><h2>${esc(s.a)}<span>${esc(s.b)}</span></h2>${s.lead?`<p class="lead">${s.lead}</p>`:""}</div>${body}</section>`; }).join(""));
+  <div class="head"><h2>${esc(s.a)}<span>${esc(s.b)}</span></h2>${s.kind==="rules"?`<button class="toggle" type="button" aria-expanded="false" aria-controls="rules-list" aria-label="Show house rules"><i></i></button>`:""}${s.lead?`<p class="lead">${s.lead}</p>`:""}</div>${body}</section>`; }).join(""));
 
 document.getElementById("index").innerHTML = SECTIONS.filter(s=>!s.skipIndex).map((s,i)=>`<a href="#${s.id}"><b>${pad(i+1)}</b>${esc(s.a+" "+s.b)}</a>`).join("");
 
@@ -250,6 +263,12 @@ if (window.Lenis && !reduce && !matchMedia("print").matches) {
 const go = el => lenis ? lenis.scrollTo(el, { offset: -100, duration: 1.4 }) : el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
 document.getElementById("go").addEventListener("click", () => go(sections[0]));
 document.getElementById("index").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); go(document.querySelector(a.hash)); });
+
+// ---- house rules: + opens, × closes
+const tg = document.querySelector("#house-rules .toggle"), rl = document.getElementById("rules-list");
+tg.addEventListener("click", () => { const open = tg.getAttribute("aria-expanded") !== "true";
+  tg.setAttribute("aria-expanded", open); tg.setAttribute("aria-label", open ? "Hide house rules" : "Show house rules");
+  rl.hidden = !open; if (open) { rl.classList.add("in"); lenis?.resize?.(); } });
 
 // ---- reveal, bar label, progress, bottle drift
 document.documentElement.classList.add("js");
