@@ -123,6 +123,35 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .plan{margin-top:clamp(20px,3vw,32px);opacity:0;transform:translateY(12px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
 .plan.in{opacity:1;transform:none}
 .plan img{display:block;width:100%;max-width:1400px;height:auto;margin:0 auto}
+/* interactive floor plan: zone chips, tappable tables, detail card */
+.plan-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--cream-70);border:1px solid var(--line);border-radius:999px;padding:8px 14px;transition:color .2s,border-color .2s,background .2s}
+.chip:hover,.chip:focus-visible{color:var(--cream);border-color:var(--cream-40);outline:none}
+.chip[aria-pressed="true"]{color:var(--ground);background:var(--cream);border-color:var(--cream)}
+.plan-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(24px,3vw,40px);align-items:start}
+.plan-scroll{min-width:0;overflow-x:auto;scrollbar-width:thin}
+.plan-map{position:relative}
+.spots{position:absolute;inset:0;width:100%;height:100%}
+.spot{cursor:pointer;outline:none}
+.spot .hit{fill:rgba(239,227,207,0);stroke:rgba(239,227,207,0);stroke-width:2;transition:fill .25s,stroke .25s}
+.spot:hover .hit,.spot:focus-visible .hit{fill:rgba(239,227,207,.12);stroke:rgba(239,227,207,.7)}
+.spot.match .hit{fill:rgba(239,227,207,.14);stroke:rgba(239,227,207,.55)}
+.spot.on .hit{fill:rgba(239,227,207,.3);stroke:var(--cream);stroke-width:3}
+.plan-card{position:sticky;top:120px;border-top:1px solid var(--line);padding-top:18px;display:grid;gap:14px}
+.plan-card h3{margin:0;font-family:var(--display);font-weight:500;font-size:44px;line-height:1;text-transform:uppercase}
+.plan-card .zone{color:var(--cream-70)}
+.plan-card dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:8px 16px;font-size:13px}
+.plan-card dt{color:var(--cream-70)} .plan-card dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.plan-card .sub{grid-column:1/-1;margin-top:6px;padding-top:10px;border-top:1px solid var(--line);color:var(--cream-40)}
+.plan-card table{width:100%;border-collapse:collapse;font-size:12px}
+.plan-card th{font-weight:400;text-align:left;color:var(--cream-40);padding:0 0 6px}
+.plan-card th:not(:first-child),.plan-card td:not(:first-child){text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.plan-card td{padding:9px 0;border-top:1px solid var(--line)}
+.plan-card .note{font-size:11px;line-height:1.6;color:var(--cream-40);margin:0}
+.plan-card .book{justify-self:start}
+.plan-hint{display:none;color:var(--cream-40);margin:12px 0 0}
+@media (max-width:900px){.plan-wrap{grid-template-columns:1fr}.plan-card{position:static}}
+@media (max-width:700px){.plan-map{width:860px}.plan-hint{display:block}}
 /* back to top: round arrow, bottom-right, shown after the hero */
 .totop{position:fixed;right:calc(max(16px,env(safe-area-inset-right,0px)) + 4px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:9;width:48px;height:48px;border:1px solid var(--cream-40);border-radius:50%;background:var(--ground);display:grid;place-items:center;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .3s,transform .3s,border-color .2s}
 .totop.show{opacity:1;transform:none;pointer-events:auto}
@@ -144,6 +173,9 @@ footer h2 span{display:block;font-weight:400;color:var(--cream-70)}
 footer .mono{color:var(--cream-70)}
 
 @media (max-width:640px){
+  .bar{gap:8px}
+  .bar .right{gap:6px;letter-spacing:.06em}
+  .bar img{height:15px;flex:none}
   .heads,.row{grid-template-columns:1fr 50px 60px}
   .shelf{grid-template-columns:repeat(3,1fr)}
   .shelf figure img{height:116px}
@@ -196,6 +228,9 @@ footer .mono{color:var(--cream-70)}
   .sec #plan-body[hidden]{display:block!important}
   .plan{opacity:1!important;transform:none!important}
   .plan img{max-height:160mm;width:auto;max-width:100%}
+  .plan-chips,.spots,.plan-card,.plan-hint{display:none!important}
+  .plan-wrap{display:block}
+  .plan-map{width:auto}
   .toggle{display:none}
   .rule{grid-template-columns:16mm 1fr;gap:6mm}
   .rule img{width:16mm;height:16mm}
@@ -261,7 +296,7 @@ document.querySelector("footer").insertAdjacentHTML("beforebegin", SECTIONS.map(
   const body = s.kind==="gallery" ? `<div class="gallery">${s.groups.map(shelf).join("")}</div>`
     : s.kind==="cocktails" ? `<div class="sig">${s.items.map(cocktail).join("")}</div>`
     : s.kind==="rules" ? `<div class="rules" id="rules-list" hidden>${s.items.map(rule).join("")}</div>`
-    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, outdoor smoking area OC1 to OC3, foyer and entrance."></div>`
+    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, outdoor smoking area OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite"></aside></div><p class="plan-hint mono">Swipe the plan sideways · tap a table</p></div>`
     : `<div class="cols">${s.groups.map(listGroup(s.one)).join("")}</div>`;
   return `<section class="sec" id="${s.id}" data-label="${esc(s.a+" "+s.b)}">
   <div class="head"><h2>${esc(s.a)}<span>${esc(s.b)}</span></h2>${s.kind==="rules"||s.kind==="floorplan"?`<button class="toggle" type="button" aria-expanded="false" aria-controls="${s.kind==="rules"?"rules-list":"plan-body"}" aria-label="Show ${s.kind==="rules"?"house rules":"floor plan"}"><i></i></button>`:""}${s.lead?`<p class="lead">${s.lead}</p>`:""}</div>${body}</section>`; }).join(""));
@@ -281,6 +316,42 @@ if (window.Lenis && !reduce && !matchMedia("print").matches) {
 const go = el => lenis ? lenis.scrollTo(el, { offset: -100, duration: 1.4 }) : el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
 document.getElementById("go").addEventListener("click", () => go(sections[0]));
 document.getElementById("index").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); go(document.querySelector(a.hash)); });
+
+// ---- interactive floor plan
+const SPOTS = [["VV3","vip","r",[161,262,68,62]],["VV2","vip","r",[240,262,68,62]],["VV1","vip","r",[318,262,68,62]],["VV4","vip","r",[112,350,106,70]],["VV5","vip","r",[112,440,106,70]],["VV6","vip","r",[112,530,106,70]],["VV7","vip","r",[112,618,106,70]],["VV8","vip","r",[178,706,72,94]],["VV9","vip","r",[270,706,72,94]],["VV10","vip","r",[358,706,72,94]],["ST1","stand","c",[420,383,24]],["ST10","stand","c",[482,383,24]],["ST11","stand","c",[541,383,24]],["ST2","stand","c",[420,444,24]],["ST9","stand","c",[482,444,24]],["ST12","stand","c",[541,444,24]],["ST3","stand","c",[420,505,24]],["ST8","stand","c",[482,505,24]],["ST13","stand","c",[541,505,24]],["ST4","stand","c",[420,565,24]],["ST7","stand","c",[482,565,24]],["ST14","stand","c",[541,565,24]],["ST5","stand","c",[420,626,24]],["ST6","stand","c",[482,626,24]],["ST15","stand","c",[541,626,24]],["ST16","stand","r",[526,671,63,24]],["ST17","stand","r",[604,671,80,24]],["ST18","stand","r",[684,671,68,24]],["ST19","stand","r",[752,671,72,24]],["ST20","stand","r",[839,671,60,24]],["V6","sofa","r",[593,312,40,58]],["V7","sofa","r",[676,312,40,58]],["V8","sofa","r",[766,312,40,58]],["V9","sofa","r",[855,312,40,58]],["V1","sofa","r",[553,758,40,62]],["V2","sofa","r",[625,758,40,62]],["V3","sofa","r",[698,758,40,62]],["V4","sofa","r",[770,758,40,62]],["V5","sofa","r",[843,758,40,62]],["B1","bar","c",[637,411,16]],["B2","bar","c",[677,411,16]],["B3","bar","c",[718,411,16]],["B4","bar","c",[759,411,16]],["B5","bar","c",[798,411,16]],["B6","bar","c",[839,411,16]],["B7","bar","c",[880,411,16]],["OC1","outdoor","r",[998,798,122,86]],["OC2","outdoor","r",[1158,828,134,38]],["OC3","outdoor","r",[1158,690,134,52]]];  // [table, zone, shape, geometry in floorplan px]
+const ZONES = {  // minimum spend in THB, from the Floor Plan & Pricing sheet
+  vip:     { name: "VIP Zone", label: "VIP zone sofa", pax: 10, fs: "30,000", wd: "15,000", xmas: ["50,000","50,000","70,000"] },
+  sofa:    { name: "Sofa", label: "Sofa", pax: 10, fs: "20,000", wd: "10,000", xmas: ["25,000","25,000","30,000"] },
+  stand:   { name: "Standing", label: "Standing table", pax: 6, fs: "10,000", wd: "6,000", xmas: ["15,000","15,000","15,000"] },
+  bar:     { name: "Bar", label: "Bar seat" },
+  outdoor: { name: "Outdoor", label: "Outdoor smoking area" },
+};
+const NOTE = `<p class="note">Minimum spend in Thai Baht. Deposits are non-refundable. Tables must be picked up before 10:30, otherwise they are cancelled.</p>`;
+const BOOK = `<a class="ig book mono" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">Book a table · @houseofsavoybangkok</a>`;
+const svgNS = "http://www.w3.org/2000/svg", svg = document.querySelector("#plan-body .spots"), card = document.querySelector("#plan-body .plan-card"), chips = document.querySelector("#plan-body .plan-chips");
+const spotEls = SPOTS.map(([n, z, t, g]) => {
+  const a = document.createElementNS(svgNS, "g"); a.setAttribute("class", "spot"); a.dataset.t = n; a.dataset.z = z;
+  a.setAttribute("tabindex", "0"); a.setAttribute("role", "button"); a.setAttribute("aria-label", `${n}, ${ZONES[z].label}`);
+  const sh = document.createElementNS(svgNS, t === "c" ? "circle" : "rect"); sh.setAttribute("class", "hit");
+  if (t === "c") { sh.setAttribute("cx", g[0]); sh.setAttribute("cy", g[1]); sh.setAttribute("r", g[2]); }
+  else { ["x","y","width","height"].forEach((k, i) => sh.setAttribute(k, g[i])); sh.setAttribute("rx", 6); }
+  a.appendChild(sh); svg.appendChild(a); return a;
+});
+const summary = () => `<span class="mono zone">Tap a table on the plan</span><table><thead><tr><th>Table</th><th>Guests</th><th>Fri–Sat</th><th>Weekdays</th></tr></thead><tbody>${
+  ["vip","sofa","stand"].map(k => { const Z = ZONES[k]; return `<tr><td>${Z.label}</td><td>${Z.pax}</td><td>${Z.fs}</td><td>${Z.wd}</td></tr>`; }).join("")}</tbody></table>${NOTE}${BOOK}`;
+const detail = (n, z) => { const Z = ZONES[z];
+  return `<span class="mono zone">${Z.label}</span><h3>${n}</h3>` + (Z.pax ? `<dl><dt>Guests</dt><dd>up to ${Z.pax}</dd><dt>Fri–Sat</dt><dd>${Z.fs}</dd><dt>Weekdays</dt><dd>${Z.wd}</dd>
+    <dt class="sub mono">Christmas &amp; New Year's Eve</dt><dt>24 Dec</dt><dd>${Z.xmas[0]}</dd><dt>25 Dec</dt><dd>${Z.xmas[1]}</dd><dt>31 Dec</dt><dd>${Z.xmas[2]}</dd></dl>${NOTE}`
+    : `<p class="note">No minimum spend is listed for this area. Ask our team when you book.</p>`) + BOOK; };
+let zone = "all";
+function pick(el) { spotEls.forEach(s => s.classList.toggle("on", s === el)); card.innerHTML = el ? detail(el.dataset.t, el.dataset.z) : summary(); }
+function filter(z) { zone = z; chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.z === z));
+  spotEls.forEach(s => s.classList.toggle("match", z !== "all" && s.dataset.z === z)); pick(null); }
+chips.innerHTML = [["all","All tables"], ...Object.entries(ZONES).map(([k, Z]) => [k, Z.name])].map(([k, l]) => `<button class="chip" type="button" data-z="${k}" aria-pressed="${k==="all"}">${l}</button>`).join("");
+chips.addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) filter(c.dataset.z); });
+svg.addEventListener("click", e => { const s = e.target.closest(".spot"); if (s) pick(s.classList.contains("on") ? null : s); });
+svg.addEventListener("keydown", e => { const s = e.target.closest(".spot"); if (s && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(s); } });
+pick(null);
 
 // ---- back to top
 const totop = document.getElementById("totop");
