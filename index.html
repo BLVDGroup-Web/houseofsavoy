@@ -296,7 +296,7 @@ document.querySelector("footer").insertAdjacentHTML("beforebegin", SECTIONS.map(
   const body = s.kind==="gallery" ? `<div class="gallery">${s.groups.map(shelf).join("")}</div>`
     : s.kind==="cocktails" ? `<div class="sig">${s.items.map(cocktail).join("")}</div>`
     : s.kind==="rules" ? `<div class="rules" id="rules-list" hidden>${s.items.map(rule).join("")}</div>`
-    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, outdoor smoking area OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite"></aside></div><p class="plan-hint mono">Swipe the plan sideways · tap a table</p></div>`
+    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, smoking room OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite"></aside></div><p class="plan-hint mono">Swipe the plan sideways · tap a table</p></div>`
     : `<div class="cols">${s.groups.map(listGroup(s.one)).join("")}</div>`;
   return `<section class="sec" id="${s.id}" data-label="${esc(s.a+" "+s.b)}">
   <div class="head"><h2>${esc(s.a)}<span>${esc(s.b)}</span></h2>${s.kind==="rules"||s.kind==="floorplan"?`<button class="toggle" type="button" aria-expanded="false" aria-controls="${s.kind==="rules"?"rules-list":"plan-body"}" aria-label="Show ${s.kind==="rules"?"house rules":"floor plan"}"><i></i></button>`:""}${s.lead?`<p class="lead">${s.lead}</p>`:""}</div>${body}</section>`; }).join(""));
@@ -324,7 +324,7 @@ const ZONES = {  // minimum spend in THB, from the Floor Plan & Pricing sheet
   sofa:    { name: "Sofa", label: "Sofa", pax: 10, fs: "20,000", wd: "10,000", xmas: ["25,000","25,000","30,000"] },
   stand:   { name: "Standing", label: "Standing table", pax: 6, fs: "10,000", wd: "6,000", xmas: ["15,000","15,000","15,000"] },
   bar:     { name: "Bar", label: "Bar seat" },
-  outdoor: { name: "Outdoor", label: "Outdoor smoking area" },
+  outdoor: { name: "Smoking Room", label: "Smoking room" },
 };
 const NOTE = `<p class="note">Minimum spend in Thai Baht. Deposits are non-refundable. Tables must be picked up before 10:30, otherwise they are cancelled.</p>`;
 const BOOK = `<a class="ig book mono" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">Book a table · @houseofsavoybangkok</a>`;
