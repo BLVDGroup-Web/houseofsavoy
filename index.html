@@ -139,6 +139,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .spot.on .hit{fill:rgba(239,227,207,.3);stroke:var(--cream);stroke-width:3}
 .plan-card{position:absolute;z-index:2;width:250px;display:grid;gap:12px;padding:16px 18px;background:var(--ground);border:1px solid var(--cream-40);box-shadow:0 12px 32px rgba(0,0,0,.5)}
 .plan-card[hidden]{display:none}
+.plan-card{pointer-events:none}  /* info only: taps go through to the tables underneath */
 .plan-card h3{margin:0;font-family:var(--display);font-weight:500;font-size:34px;line-height:1;text-transform:uppercase}
 .plan-card .zone{color:var(--cream-70)}
 .plan-card dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:8px 16px;font-size:13px}
@@ -320,15 +321,13 @@ document.getElementById("index").addEventListener("click", e => { const a = e.ta
 
 // ---- interactive floor plan
 const SPOTS = [["VV3","vip","r",[161,262,68,62]],["VV2","vip","r",[240,262,68,62]],["VV1","vip","r",[318,262,68,62]],["VV4","vip","r",[112,350,106,70]],["VV5","vip","r",[112,440,106,70]],["VV6","vip","r",[112,530,106,70]],["VV7","vip","r",[112,618,106,70]],["VV8","vip","r",[178,706,72,94]],["VV9","vip","r",[270,706,72,94]],["VV10","vip","r",[358,706,72,94]],["ST1","stand","c",[420,383,24]],["ST10","stand","c",[482,383,24]],["ST11","stand","c",[541,383,24]],["ST2","stand","c",[420,444,24]],["ST9","stand","c",[482,444,24]],["ST12","stand","c",[541,444,24]],["ST3","stand","c",[420,505,24]],["ST8","stand","c",[482,505,24]],["ST13","stand","c",[541,505,24]],["ST4","stand","c",[420,565,24]],["ST7","stand","c",[482,565,24]],["ST14","stand","c",[541,565,24]],["ST5","stand","c",[420,626,24]],["ST6","stand","c",[482,626,24]],["ST15","stand","c",[541,626,24]],["ST16","stand","r",[526,671,63,24]],["ST17","stand","r",[604,671,80,24]],["ST18","stand","r",[684,671,68,24]],["ST19","stand","r",[752,671,72,24]],["ST20","stand","r",[839,671,60,24]],["V6","sofa","r",[593,312,40,58]],["V7","sofa","r",[676,312,40,58]],["V8","sofa","r",[766,312,40,58]],["V9","sofa","r",[855,312,40,58]],["V1","sofa","r",[553,758,40,62]],["V2","sofa","r",[625,758,40,62]],["V3","sofa","r",[698,758,40,62]],["V4","sofa","r",[770,758,40,62]],["V5","sofa","r",[843,758,40,62]],["B1","bar","c",[637,411,16]],["B2","bar","c",[677,411,16]],["B3","bar","c",[718,411,16]],["B4","bar","c",[759,411,16]],["B5","bar","c",[798,411,16]],["B6","bar","c",[839,411,16]],["B7","bar","c",[880,411,16]],["OC1","outdoor","r",[998,798,122,86]],["OC2","outdoor","r",[1158,828,134,38]],["OC3","outdoor","r",[1158,690,134,52]]];  // [table, zone, shape, geometry in floorplan px]
-const ZONES = {  // minimum spend in THB, from the Floor Plan & Pricing sheet
-  vip:     { name: "VIP Zone", label: "VIP zone sofa", pax: 10, fs: "30,000", wd: "15,000", xmas: ["50,000","50,000","70,000"] },
-  sofa:    { name: "Sofa", label: "Sofa", pax: 10, fs: "20,000", wd: "10,000", xmas: ["25,000","25,000","30,000"] },
-  stand:   { name: "Standing", label: "Standing table", pax: 6, fs: "10,000", wd: "6,000", xmas: ["15,000","15,000","15,000"] },
+const ZONES = {  // seats per table, from the Floor Plan & Pricing sheet
+  vip:     { name: "VIP Zone", label: "VIP zone sofa", pax: 10 },
+  sofa:    { name: "Sofa", label: "Sofa", pax: 10 },
+  stand:   { name: "Standing", label: "Standing table", pax: 6 },
   bar:     { name: "Bar", label: "Bar seat" },
   outdoor: { name: "Smoking Room", label: "Smoking room" },
 };
-const NOTE = `<p class="note">Minimum spend in Thai Baht. Deposits are non-refundable. Tables must be picked up before 10:30, otherwise they are cancelled.</p>`;
-const BOOK = `<a class="ig book mono" href="https://www.instagram.com/houseofsavoybangkok/" target="_blank" rel="noopener">Book a table · @houseofsavoybangkok</a>`;
 const svgNS = "http://www.w3.org/2000/svg", svg = document.querySelector("#plan-body .spots"), card = document.querySelector("#plan-body .plan-card"), chips = document.querySelector("#plan-body .plan-chips");
 const spotEls = SPOTS.map(([n, z, t, g]) => {
   const a = document.createElementNS(svgNS, "g"); a.setAttribute("class", "spot"); a.dataset.t = n; a.dataset.z = z;
@@ -339,9 +338,7 @@ const spotEls = SPOTS.map(([n, z, t, g]) => {
   a.appendChild(sh); svg.appendChild(a); return a;
 });
 const detail = (n, z) => { const Z = ZONES[z];
-  return `<span class="mono zone">${Z.label}</span><h3>${n}</h3>` + (Z.pax ? `<dl><dt>Guests</dt><dd>up to ${Z.pax}</dd><dt>Fri–Sat</dt><dd>${Z.fs}</dd><dt>Weekdays</dt><dd>${Z.wd}</dd>
-    <dt class="sub mono">Christmas &amp; New Year's Eve</dt><dt>24 Dec</dt><dd>${Z.xmas[0]}</dd><dt>25 Dec</dt><dd>${Z.xmas[1]}</dd><dt>31 Dec</dt><dd>${Z.xmas[2]}</dd></dl>${NOTE}`
-    : `<p class="note">No minimum spend is listed for this area. Ask our team when you book.</p>`) + BOOK; };
+  return `<span class="mono zone">${Z.label}</span><h3>${n}</h3><dl><dt>Guests</dt><dd>${Z.pax ? "up to " + Z.pax : "ask our team"}</dd></dl>`; };
 let zone = "all";
 function pick(el) {
   spotEls.forEach(s => s.classList.toggle("on", s === el));
