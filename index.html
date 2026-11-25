@@ -128,7 +128,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .chip{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--cream-70);border:1px solid var(--line);border-radius:999px;padding:8px 14px;transition:color .2s,border-color .2s,background .2s}
 .chip:hover,.chip:focus-visible{color:var(--cream);border-color:var(--cream-40);outline:none}
 .chip[aria-pressed="true"]{color:var(--ground);background:var(--cream);border-color:var(--cream)}
-.plan-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(24px,3vw,40px);align-items:start}
+.plan-wrap{position:relative}
 .plan-scroll{min-width:0;overflow-x:auto;scrollbar-width:thin}
 .plan-map{position:relative}
 .spots{position:absolute;inset:0;width:100%;height:100%}
@@ -137,8 +137,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .spot:hover .hit,.spot:focus-visible .hit{fill:rgba(239,227,207,.12);stroke:rgba(239,227,207,.7)}
 .spot.match .hit{fill:rgba(239,227,207,.14);stroke:rgba(239,227,207,.55)}
 .spot.on .hit{fill:rgba(239,227,207,.3);stroke:var(--cream);stroke-width:3}
-.plan-card{position:sticky;top:120px;border-top:1px solid var(--line);padding-top:18px;display:grid;gap:14px}
-.plan-card h3{margin:0;font-family:var(--display);font-weight:500;font-size:44px;line-height:1;text-transform:uppercase}
+.plan-card{position:absolute;z-index:2;width:250px;display:grid;gap:12px;padding:16px 18px;background:var(--ground);border:1px solid var(--cream-40);box-shadow:0 12px 32px rgba(0,0,0,.5)}
+.plan-card[hidden]{display:none}
+.plan-card h3{margin:0;font-family:var(--display);font-weight:500;font-size:34px;line-height:1;text-transform:uppercase}
 .plan-card .zone{color:var(--cream-70)}
 .plan-card dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:8px 16px;font-size:13px}
 .plan-card dt{color:var(--cream-70)} .plan-card dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -150,8 +151,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .plan-card .note{font-size:11px;line-height:1.6;color:var(--cream-40);margin:0}
 .plan-card .book{justify-self:start}
 .plan-hint{display:none;color:var(--cream-40);margin:12px 0 0}
-@media (max-width:900px){.plan-wrap{grid-template-columns:1fr}.plan-card{position:static}}
-@media (max-width:700px){.plan-map{width:860px}.plan-hint{display:block}}
+@media (max-width:700px){.plan-map{width:860px}.plan-hint{display:block}
+  .plan-card{position:static;width:auto;margin-top:16px;transform:none!important;box-shadow:none}}
 /* back to top: round arrow, bottom-right, shown after the hero */
 .totop{position:fixed;right:calc(max(16px,env(safe-area-inset-right,0px)) + 4px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:9;width:48px;height:48px;border:1px solid var(--cream-40);border-radius:50%;background:var(--ground);display:grid;place-items:center;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .3s,transform .3s,border-color .2s}
 .totop.show{opacity:1;transform:none;pointer-events:auto}
@@ -296,7 +297,7 @@ document.querySelector("footer").insertAdjacentHTML("beforebegin", SECTIONS.map(
   const body = s.kind==="gallery" ? `<div class="gallery">${s.groups.map(shelf).join("")}</div>`
     : s.kind==="cocktails" ? `<div class="sig">${s.items.map(cocktail).join("")}</div>`
     : s.kind==="rules" ? `<div class="rules" id="rules-list" hidden>${s.items.map(rule).join("")}</div>`
-    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, smoking room OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite"></aside></div><p class="plan-hint mono">Swipe the plan sideways · tap a table</p></div>`
+    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, smoking room OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite" hidden></aside></div><p class="plan-hint mono">Swipe the plan sideways · tap a table</p></div>`
     : `<div class="cols">${s.groups.map(listGroup(s.one)).join("")}</div>`;
   return `<section class="sec" id="${s.id}" data-label="${esc(s.a+" "+s.b)}">
   <div class="head"><h2>${esc(s.a)}<span>${esc(s.b)}</span></h2>${s.kind==="rules"||s.kind==="floorplan"?`<button class="toggle" type="button" aria-expanded="false" aria-controls="${s.kind==="rules"?"rules-list":"plan-body"}" aria-label="Show ${s.kind==="rules"?"house rules":"floor plan"}"><i></i></button>`:""}${s.lead?`<p class="lead">${s.lead}</p>`:""}</div>${body}</section>`; }).join(""));
@@ -337,14 +338,23 @@ const spotEls = SPOTS.map(([n, z, t, g]) => {
   else { ["x","y","width","height"].forEach((k, i) => sh.setAttribute(k, g[i])); sh.setAttribute("rx", 6); }
   a.appendChild(sh); svg.appendChild(a); return a;
 });
-const summary = () => `<span class="mono zone">Tap a table on the plan</span><table><thead><tr><th>Table</th><th>Guests</th><th>Fri–Sat</th><th>Weekdays</th></tr></thead><tbody>${
-  ["vip","sofa","stand"].map(k => { const Z = ZONES[k]; return `<tr><td>${Z.label}</td><td>${Z.pax}</td><td>${Z.fs}</td><td>${Z.wd}</td></tr>`; }).join("")}</tbody></table>${NOTE}${BOOK}`;
 const detail = (n, z) => { const Z = ZONES[z];
   return `<span class="mono zone">${Z.label}</span><h3>${n}</h3>` + (Z.pax ? `<dl><dt>Guests</dt><dd>up to ${Z.pax}</dd><dt>Fri–Sat</dt><dd>${Z.fs}</dd><dt>Weekdays</dt><dd>${Z.wd}</dd>
     <dt class="sub mono">Christmas &amp; New Year's Eve</dt><dt>24 Dec</dt><dd>${Z.xmas[0]}</dd><dt>25 Dec</dt><dd>${Z.xmas[1]}</dd><dt>31 Dec</dt><dd>${Z.xmas[2]}</dd></dl>${NOTE}`
     : `<p class="note">No minimum spend is listed for this area. Ask our team when you book.</p>`) + BOOK; };
 let zone = "all";
-function pick(el) { spotEls.forEach(s => s.classList.toggle("on", s === el)); card.innerHTML = el ? detail(el.dataset.t, el.dataset.z) : summary(); }
+function pick(el) {
+  spotEls.forEach(s => s.classList.toggle("on", s === el));
+  if (!el) { card.hidden = true; return; }
+  card.innerHTML = detail(el.dataset.t, el.dataset.z); card.hidden = false;
+  // anchor beside the table, flipping left/up when the table sits in the right/bottom half of the plan
+  const b = el.getBBox(), cx = b.x + b.width / 2, cy = b.y + b.height / 2, right = cx > 700, low = cy > 470;
+  card.style.left = ((right ? b.x - 12 : b.x + b.width + 12) / 1400 * 100) + "%";
+  card.style.top = ((low ? b.y + b.height : b.y) / 940 * 100) + "%";
+  card.style.transform = `translate(${right ? "-100%" : "0"}, ${low ? "-100%" : "0"})`;
+  if (matchMedia("(max-width:700px)").matches) card.scrollIntoView?.({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+}
+document.addEventListener("click", e => { if (!card.hidden && !e.target.closest(".spot, .plan-card, .chip")) pick(null); });
 function filter(z) { zone = z; chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.z === z));
   spotEls.forEach(s => s.classList.toggle("match", z !== "all" && s.dataset.z === z)); pick(null); }
 chips.innerHTML = [["all","All tables"], ...Object.entries(ZONES).map(([k, Z]) => [k, Z.name])].map(([k, l]) => `<button class="chip" type="button" data-z="${k}" aria-pressed="${k==="all"}">${l}</button>`).join("");
