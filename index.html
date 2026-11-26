@@ -240,6 +240,9 @@ footer .mono{color:var(--cream-70)}
   .rule span{font-size:10px}
   footer{height:210mm;padding:12mm 14mm;align-content:start;break-after:auto}
 }
+
+/* floor plan a little smaller on wide screens */
+@media (min-width:701px){#plan-body .plan-chips,#plan-body .plan-wrap{max-width:1080px;margin-left:auto;margin-right:auto}}
 </style>
 
 <button class="totop" type="button" id="totop" aria-label="Back to top"><i></i></button>
@@ -322,11 +325,11 @@ document.getElementById("index").addEventListener("click", e => { const a = e.ta
 // ---- interactive floor plan
 const SPOTS = [["VV3","vip","r",[161,262,68,62]],["VV2","vip","r",[240,262,68,62]],["VV1","vip","r",[318,262,68,62]],["VV4","vip","r",[112,350,106,70]],["VV5","vip","r",[112,440,106,70]],["VV6","vip","r",[112,530,106,70]],["VV7","vip","r",[112,618,106,70]],["VV8","vip","r",[178,706,72,94]],["VV9","vip","r",[270,706,72,94]],["VV10","vip","r",[358,706,72,94]],["ST1","stand","c",[420,383,24]],["ST10","stand","c",[482,383,24]],["ST11","stand","c",[541,383,24]],["ST2","stand","c",[420,444,24]],["ST9","stand","c",[482,444,24]],["ST12","stand","c",[541,444,24]],["ST3","stand","c",[420,505,24]],["ST8","stand","c",[482,505,24]],["ST13","stand","c",[541,505,24]],["ST4","stand","c",[420,565,24]],["ST7","stand","c",[482,565,24]],["ST14","stand","c",[541,565,24]],["ST5","stand","c",[420,626,24]],["ST6","stand","c",[482,626,24]],["ST15","stand","c",[541,626,24]],["ST16","stand","r",[526,671,63,24]],["ST17","stand","r",[604,671,80,24]],["ST18","stand","r",[684,671,68,24]],["ST19","stand","r",[752,671,72,24]],["ST20","stand","r",[839,671,60,24]],["V6","sofa","r",[593,312,40,58]],["V7","sofa","r",[676,312,40,58]],["V8","sofa","r",[766,312,40,58]],["V9","sofa","r",[855,312,40,58]],["V1","sofa","r",[553,758,40,62]],["V2","sofa","r",[625,758,40,62]],["V3","sofa","r",[698,758,40,62]],["V4","sofa","r",[770,758,40,62]],["V5","sofa","r",[843,758,40,62]],["B1","bar","c",[637,411,16]],["B2","bar","c",[677,411,16]],["B3","bar","c",[718,411,16]],["B4","bar","c",[759,411,16]],["B5","bar","c",[798,411,16]],["B6","bar","c",[839,411,16]],["B7","bar","c",[880,411,16]],["OC1","outdoor","r",[998,798,122,86]],["OC2","outdoor","r",[1158,828,134,38]],["OC3","outdoor","r",[1158,690,134,52]]];  // [table, zone, shape, geometry in floorplan px]
 const ZONES = {  // seats per table, from the Floor Plan & Pricing sheet
-  vip:     { name: "VIP Zone", label: "VIP zone sofa", pax: 10 },
-  sofa:    { name: "Sofa", label: "Sofa", pax: 10 },
-  stand:   { name: "Standing", label: "Standing table", pax: 6 },
-  bar:     { name: "Bar", label: "Bar seat" },
-  outdoor: { name: "Smoking Room", label: "Smoking room" },
+  vip:     { name: "VIP Zone", label: "VIP zone sofa", zone: "VIP Zone", pax: 10 },
+  sofa:    { name: "Sofa", label: "Sofa", zone: "Main Floor", pax: 10 },
+  stand:   { name: "Standing", label: "Standing table", zone: "Main Floor", pax: 6 },
+  bar:     { name: "Bar", label: "Bar seat", zone: "Bar" },
+  outdoor: { name: "Smoking Room", label: "Smoking room", zone: "Smoking Room" },
 };
 const svgNS = "http://www.w3.org/2000/svg", svg = document.querySelector("#plan-body .spots"), card = document.querySelector("#plan-body .plan-card"), chips = document.querySelector("#plan-body .plan-chips");
 const spotEls = SPOTS.map(([n, z, t, g]) => {
@@ -338,7 +341,7 @@ const spotEls = SPOTS.map(([n, z, t, g]) => {
   a.appendChild(sh); svg.appendChild(a); return a;
 });
 const detail = (n, z) => { const Z = ZONES[z];
-  return `<span class="mono zone">${Z.label}</span><h3>${n}</h3><dl><dt>Guests</dt><dd>${Z.pax ? "up to " + Z.pax : "ask our team"}</dd></dl>`; };
+  return `<span class="mono zone">${Z.label}</span><h3>${n}</h3><dl><dt>Zone</dt><dd>${Z.zone}</dd><dt>Guests</dt><dd>${Z.pax ? "up to " + Z.pax : "ask our team"}</dd></dl>`; };
 let zone = "all";
 function pick(el) {
   spotEls.forEach(s => s.classList.toggle("on", s === el));
