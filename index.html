@@ -152,7 +152,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .plan-card .note{font-size:11px;line-height:1.6;color:var(--cream-40);margin:0}
 .plan-card .book{justify-self:start}
 .plan-hint{display:none;color:var(--cream-40);margin:12px 0 0}
-@media (max-width:700px){.plan-map{width:860px}.plan-hint{display:block}
+@media (max-width:700px){.plan-map{width:100%}.plan-hint{display:block}
   .plan-card{position:static;width:auto;margin-top:16px;transform:none!important;box-shadow:none}}
 /* back to top: round arrow, bottom-right, shown after the hero */
 .totop{position:fixed;right:calc(max(16px,env(safe-area-inset-right,0px)) + 4px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:9;width:48px;height:48px;border:1px solid var(--cream-40);border-radius:50%;background:var(--ground);display:grid;place-items:center;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .3s,transform .3s,border-color .2s}
@@ -301,7 +301,7 @@ document.querySelector("footer").insertAdjacentHTML("beforebegin", SECTIONS.map(
   const body = s.kind==="gallery" ? `<div class="gallery">${s.groups.map(shelf).join("")}</div>`
     : s.kind==="cocktails" ? `<div class="sig">${s.items.map(cocktail).join("")}</div>`
     : s.kind==="rules" ? `<div class="rules" id="rules-list" hidden>${s.items.map(rule).join("")}</div>`
-    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, smoking room OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite" hidden></aside></div><p class="plan-hint mono">Swipe the plan sideways · tap a table</p></div>`
+    : s.kind==="floorplan" ? `<div class="plan" id="plan-body" hidden><div class="plan-chips mono" role="group" aria-label="Show tables by area"></div><div class="plan-wrap"><div class="plan-scroll" data-lenis-prevent-touch><div class="plan-map"><img src="${img("floorplan.webp")}" width="1400" height="940" loading="lazy" alt="House of Savoy floor plan: VIP zone with tables VV1 to VV10 around the DJ booth, standing tables ST1 to ST20, sofas V1 to V9, bar seats B1 to B7, smoking room OC1 to OC3, foyer and entrance."><svg class="spots" viewBox="0 0 1400 940" aria-label="Tables"></svg></div></div><aside class="plan-card" aria-live="polite" hidden></aside></div><p class="plan-hint mono">Tap a table to see its zone and guests</p></div>`
     : `<div class="cols">${s.groups.map(listGroup(s.one)).join("")}</div>`;
   return `<section class="sec" id="${s.id}" data-label="${esc(s.a+" "+s.b)}">
   <div class="head"><h2>${esc(s.a)}<span>${esc(s.b)}</span></h2>${s.kind==="rules"||s.kind==="floorplan"?`<button class="toggle" type="button" aria-expanded="false" aria-controls="${s.kind==="rules"?"rules-list":"plan-body"}" aria-label="Show ${s.kind==="rules"?"house rules":"floor plan"}"><i></i></button>`:""}${s.lead?`<p class="lead">${s.lead}</p>`:""}</div>${body}</section>`; }).join(""));
